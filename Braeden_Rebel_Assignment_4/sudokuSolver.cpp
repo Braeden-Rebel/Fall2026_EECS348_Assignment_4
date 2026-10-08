@@ -96,6 +96,53 @@ class SudokuBoard
             return CanRowHaveValue(rowIndex, value) && CanColumnHaveValue(columnIndex, value) && CanRegionHaveValue(rowIndex, columnIndex, value);
         }
 
+        int FindNextEmpty(int index)
+        {
+            int rowIndex;
+            int columnIndex;
+            while(index < 81)
+            {
+                rowIndex = index % 9;
+                columnIndex = index / 9;
+                if (!IsValidValue(board[rowIndex][columnIndex]))
+                {
+                    return index;
+                }
+                else
+                {
+                    index++;
+                }
+            }
+            return -1;
+        }
+
+        int FindSquare(int startIndex = 0)
+        {
+            int solutions = 0;
+            int targetIndex = FindNextEmpty(startIndex);
+            if (targetIndex != -1)
+            {
+                int rowIndex = targetIndex % 9;
+                int columnIndex = targetIndex / 9;
+                for(int n = 1; n <= 9; n++)
+                {
+                    bool valid = TryAssignIndexToValue(rowIndex, columnIndex, n);
+                    if (valid)
+                    {
+                        solutions += FindSquare(targetIndex+1);
+                    }
+                }
+                board[rowIndex][columnIndex] = 0;
+                return solutions;
+            }
+            else
+            {
+                Print();
+                cout << endl << endl;
+                return 1;
+            }
+        }
+
     public:
         void Print()
         {
@@ -123,6 +170,12 @@ class SudokuBoard
             }
         }
 
+        void PrintSolutions()
+        {
+            int solutionCount = FindSquare();
+            cout << "Solutions found: " << solutionCount;
+        }
+
         bool TryAssignIndexToValue(int rowIndex, int columnIndex, int value)
         {
             if (IsValidPositionIndex(rowIndex) && IsValidPositionIndex(columnIndex) && IsValidValue(value) && CanIndexHaveValue(rowIndex, columnIndex, value))
@@ -132,7 +185,6 @@ class SudokuBoard
             }
             else
             {
-                cout << "Fail at (" << columnIndex << ", " << rowIndex << ") with value " << value;
                 return false;
             }
         }
@@ -156,7 +208,7 @@ int main(int argc, char* argv[])
         }
         else
         {
-            SudokuBoard givenSodokuBoard;
+            SudokuBoard givenSudokuBoard;
 
             bool validBoard = true;
             int rowIndex = 0;
@@ -177,7 +229,7 @@ int main(int argc, char* argv[])
                         if (character != '_')
                         {
                             int columnIndex = i / 2;
-                            if (!givenSodokuBoard.TryAssignIndexToValue(rowIndex, columnIndex, character - '0'))
+                            if (!givenSudokuBoard.TryAssignIndexToValue(rowIndex, columnIndex, character - '0'))
                             {
                                 validBoard = false;
                             }
@@ -186,7 +238,8 @@ int main(int argc, char* argv[])
                     rowIndex++;
                 }
             }
-            givenSodokuBoard.Print();
+            
+            givenSudokuBoard.PrintSolutions();
         }
     }
 }

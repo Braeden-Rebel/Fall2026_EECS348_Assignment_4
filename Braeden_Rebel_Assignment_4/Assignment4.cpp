@@ -21,30 +21,41 @@ private:
         return 1 <= digit && digit <= 9;
     }
 
-    bool isValid(int row, int col, int num) {
-        for (int c = 0; c < 9; ++c) {
-            if (board[row][c] == num) {
+    bool isDigitValidAtRow(int rowIndex, int digit)
+    {
+        for (int columnIndex = 0; columnIndex < 9; ++columnIndex) {
+            if (board[rowIndex][columnIndex] == digit) {
                 return false;
             }
         }
+        return true;
+    }
 
-        for (int r = 0; r < 9; ++r) {
-            if (board[r][col] == num) {
+    bool isDigitValidAtColumn(int columnIndex, int digit)
+    {
+        for (int rowIndex = 0; rowIndex < 9; ++rowIndex) {
+            if (board[rowIndex][columnIndex] == digit) {
                 return false;
             }
         }
+        return true;
+    }
 
-        int startRow = row - row % 3;
-        int startCol = col - col % 3;
-        for (int r = 0; r < 3; ++r) {
-            for (int c = 0; c < 3; ++c) {
-                if (board[startRow + r][startCol + c] == num) {
+    bool isDigitValidAtBlock(int rowIndex, int columnIndex, int digit)
+    {
+        int startRow = rowIndex - rowIndex % 3;
+        int startCol = columnIndex - columnIndex % 3;
+        for (int localRowIndex = 0; localRowIndex < 3; ++localRowIndex) {
+            for (int localColumnIndex = 0; localColumnIndex < 3; ++localColumnIndex) {
+                if (board[startRow + localRowIndex][startCol + localColumnIndex] == digit) {
                     return false;
                 }
             }
         }
+    }
 
-        return true;
+    bool isDigitValidAtPosition(int rowIndex, int columnIndex, int digit) {
+        return isDigitValidAtRow(rowIndex, digit) && isDigitValidAtColumn(columnIndex, digit) && isDigitValidAtBlock(rowIndex, columnIndex, digit);
     }
 
     bool solveRecursive(int row, int col, int& solutionCount) {
@@ -64,7 +75,7 @@ private:
 
         bool foundAny = false;
         for (int num = 1; num <= 9; ++num) {
-            if (isValid(row, col, num)) {
+            if (isDigitValidAtPosition(row, col, num)) {
                 board[row][col] = num;
                 
                 if (solveRecursive(nextRow, nextCol, solutionCount)) {
@@ -95,7 +106,7 @@ public:
     bool TryAssignPositionToValue(int rowIndex, int columnIndex, int digit)
     {
         // If the position indices exist ont the board, the digit is allowed, and the digit at that position follows sudoku rules:
-        if (doesPositionExist(rowIndex, columnIndex) && isDigitAllowed(digit) && isValid(rowIndex, columnIndex, digit))
+        if (doesPositionExist(rowIndex, columnIndex) && isDigitAllowed(digit) && isDigitValidAtPosition(rowIndex, columnIndex, digit))
         {
             // Assign the position to the digit
             board[rowIndex][columnIndex] = digit;

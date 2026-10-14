@@ -5,10 +5,21 @@
 
 using namespace std;
 
-class SudokuSolver {
+// SudokuBoard class represents a valid sudoku board (Braeden)
+class SudokuBoard {
 private:
+    // Internal 2D array to represent 9x9 sudoku board (Gemini)
     int board[9][9];
-    string filename;
+
+    bool doesPositionExist(int rowIndex, int columnIndex)
+    {
+        return 0 <= rowIndex && rowIndex < 9 && 0 <= columnIndex && columnIndex < 9;
+    }
+
+    bool isDigitAllowed(int digit)
+    {
+        return 1 <= digit && digit <= 9;
+    }
 
     bool isValid(int row, int col, int num) {
         for (int c = 0; c < 9; ++c) {
@@ -68,8 +79,8 @@ private:
     }
 
 public:
-    SudokuSolver(const string& fname) : filename(fname) {
-        // Authored by student: Initialize board cells to 0 (empty)
+    SudokuBoard() {
+        // Create board and start all cells at zero (Gemini)
         for (int i = 0; i < 9; ++i) {
             for (int j = 0; j < 9; ++j) {
                 board[i][j] = 0;
@@ -77,31 +88,45 @@ public:
         }
     }
 
-    bool loadPuzzle() {
-        ifstream file(filename);
-        if (!file.is_open()) {
-            cerr << "Error: Could not open file " << filename << "\n";
+    /*
+    Function that takes in the indices of a positon and a digit and tries to assign that position to the digit given
+    Returns true if the assignment works and false otherwise
+    */
+    bool TryAssignPositionToValue(int rowIndex, int columnIndex, int digit)
+    {
+        // If the position indices exist ont the board, the digit is allowed, and the digit at that position follows sudoku rules:
+        if (doesPositionExist(rowIndex, columnIndex) && isDigitAllowed(digit) && isValid(rowIndex, columnIndex, digit))
+        {
+            // Assign the position to the digit
+            board[rowIndex][columnIndex] = digit;
+            // Return true to represent a successful assignment
+            return true;
+        }
+        else
+        {
+            // Return false to represent a failed assignment
             return false;
         }
+    }
 
-        for (int i = 0; i < 9; ++i) {
-            for (int j = 0; j < 9; ++j) {
-                char ch;
-                if (!(file >> ch)) {
-                    cerr << "Error: Malformed puzzle file " << filename << "\n";
-                    return false;
-                }
-                if (ch == '_') {
-                    board[i][j] = 0;
-                } else if (ch >= '1' && ch <= '9') {
-                    board[i][j] = ch - '0';
-                } else {
-                    board[i][j] = 0;
-                }
+
+    void ClearPosition(int rowIndex, int columnIndex)
+    {
+        if (doesPositionExist(rowIndex, columnIndex))
+        {
+            board[rowIndex][columnIndex] = 0;
+        }
+    }
+
+    void Clear()
+    {
+        for(int row = 0; row < 9; row++)
+        {
+            for(int column = 0; column < 9; column++)
+            {
+                ClearPosition(row, column);
             }
         }
-        file.close();
-        return true;
     }
 
     void printBoard() const {
@@ -119,7 +144,7 @@ public:
     }
 
     void solve() {
-        cout << "Puzzle File Name: " << filename << "\n";
+        //cout << "Puzzle File Name: " << filename << "\n";
         cout << "Original Puzzle:\n";
         printBoard();
 
@@ -141,6 +166,62 @@ class SudokuInputReader
 {
     private:
         vector<string> filePaths;
+
+        bool processLineIntoBoard(SudokuBoard &board, string line, int rowIndex)
+        {
+            if (line.length() != 17)
+            {
+                cerr << "Incorrect row length at line " << rowIndex << endl;
+                return false;
+            }
+            else
+            {
+                for(int i = 0; i < 17; i+=2)
+                {
+                    char character = line[i];
+                    
+                    if (character != '_')
+                    {
+                        int columnIndex = i / 2;
+                        if (!board.TryAssignPositionToValue(rowIndex, columnIndex, character - '0'))
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+
+        bool processFileIntoBoard(SudokuBoard &board, string filePath)
+        {
+
+            ifstream file(filePath);
+
+            if (!file.is_open())
+            {
+                cerr << "Filepath " << filePath << " could not be openned";
+                return false;
+            }
+            else
+            {
+                board.Clear();
+
+                int rowIndex = 0;
+                string line;
+                while(getline(file, line))
+                {
+                    bool lineWithoutErrors = processLineIntoBoard(board, line, rowIndex);
+                    if (!lineWithoutErrors)
+                    {
+                        return false;
+                    }
+                    rowIndex++;
+                }
+                return true;
+            }
+        }
+
     public:
         SudokuInputReader(vector<string> fPaths) : filePaths(fPaths)
         {
@@ -149,10 +230,21 @@ class SudokuInputReader
 
         void printSolutionsToAll()
         {
+            SudokuBoard board;
             for (string filePath : filePaths) {
-                SudokuSolver solver(filePath);
-                if (solver.loadPuzzle()) {
-                    solver.solve();
+                cout << "File: " << filePath << endl << endl;
+                ifstream file(filePath);
+                if(file.is_open())
+                {
+                    bool successfulFileProcessing = processFileIntoBoard(board, filePath);
+                    if (successfulFileProcessing)
+                    {
+                        board.solve();
+                    }
+                }
+                else
+                {
+                    cerr << "Error: Filepath \"" << filePath << "\" could not be opened" << endl;
                 }
             }
         }

@@ -52,41 +52,72 @@ private:
                 }
             }
         }
+        return true;
     }
 
     bool isDigitValidAtPosition(int rowIndex, int columnIndex, int digit) {
         return isDigitValidAtRow(rowIndex, digit) && isDigitValidAtColumn(columnIndex, digit) && isDigitValidAtBlock(rowIndex, columnIndex, digit);
     }
 
-    bool solveRecursive(int row, int col, int& solutionCount) {
-        if (row == 9) {
-            solutionCount++;
-            cout << "Solution " << solutionCount << ":\n";
-            printBoard();
-            return true; 
+    bool incrementPosition(int& rowIndex, int& columnIndex)
+    {
+        columnIndex++;
+        if(columnIndex == 9)
+        {
+            rowIndex++;
+            columnIndex = 0;
         }
+        return (rowIndex == 9);
+    }
 
-        int nextRow = (col == 8) ? row + 1 : row;
-        int nextCol = (col == 8) ? 0 : col + 1;
-
-        if (board[row][col] != 0) {
-            return solveRecursive(nextRow, nextCol, solutionCount);
-        }
-
-        bool foundAny = false;
-        for (int num = 1; num <= 9; ++num) {
-            if (isDigitValidAtPosition(row, col, num)) {
-                board[row][col] = num;
-                
-                if (solveRecursive(nextRow, nextCol, solutionCount)) {
-                    foundAny = true;
+    bool getIndexOfNextBlankFromPosition(int startRowIndex, int startColumnIndex, int& blankRowIndex, int& blankColumnIndex)
+    {
+        for(int rowIndex = startRowIndex; rowIndex < 9; rowIndex++)
+        {
+            for (int columnIndex = startColumnIndex; columnIndex < 9; columnIndex++)
+            {
+                int digit = board[rowIndex][columnIndex];
+                if (!isDigitAllowed(digit))
+                {
+                    blankRowIndex = rowIndex;
+                    blankColumnIndex = columnIndex;
+                    return true;
                 }
-                
-                board[row][col] = 0;
             }
+            startColumnIndex = 0;
         }
+        return false;
+    }
 
-        return foundAny;
+    bool getStringSolutionListFromPosition(int startRowIndex, int startColumnIndex, vector<string>& solutionList) {
+        int blankRowIndex;
+        int blankColumnIndex;
+        bool foundBlank = getIndexOfNextBlankFromPosition(startRowIndex, startColumnIndex, blankRowIndex, blankColumnIndex);
+
+        if (!foundBlank)
+        {
+            solutionList.push_back(toString());
+            return true;
+        }
+        else
+        {
+            //cout << "(" << blankRowIndex << ", " << blankColumnIndex << ")" <<endl << endl;
+            bool foundAny = false;
+            for (int num = 1; num <= 9; ++num) {
+                bool couldAssign = TryAssignPositionToValue(blankRowIndex, blankColumnIndex, num);
+
+                if (couldAssign)
+                {
+                    int nextRowIndex = blankRowIndex;
+                    int nextColumnIndex = blankColumnIndex;
+                    incrementPosition(nextRowIndex, nextColumnIndex);
+                    getStringSolutionListFromPosition(nextRowIndex, nextColumnIndex, solutionList);
+                    board[blankRowIndex][blankColumnIndex] = 0;
+                }
+            }
+
+            return foundAny;
+        }
     }
 
 public:
@@ -140,33 +171,26 @@ public:
         }
     }
 
-    void printBoard() const {
+    string toString() const {
+        string boardString;
         for (int i = 0; i < 9; ++i) {
+            if (i != 0) boardString += "\n";
             for (int j = 0; j < 9; ++j) {
                 if (board[i][j] == 0) {
-                    cout << "_ ";
+                    boardString += "_ ";
                 } else {
-                    cout << board[i][j] << " ";
+                    boardString += to_string(board[i][j]) += " ";
                 }
             }
-            cout << "\n";
         }
-        cout << "\n";
+        return boardString;
     }
 
-    void solve() {
+    vector<string> getStringSolutionList() {
         //cout << "Puzzle File Name: " << filename << "\n";
-        cout << "Original Puzzle:\n";
-        printBoard();
-
-        int solutionCount = 0;
-        cout << "Solving...\n";
-        bool hasSolution = solveRecursive(0, 0, solutionCount);
-
-        if (!hasSolution || solutionCount == 0) {
-            cout << "No solution found\n";
-        }
-        cout << "----------------------------------------\n\n";
+        vector<string> solutionList;
+        bool hasSolution = getStringSolutionListFromPosition(0, 0, solutionList);
+        return solutionList;
     }
 };
 
@@ -242,6 +266,7 @@ class SudokuInputReader
         void printSolutionsToAll()
         {
             SudokuBoard board;
+            cout << "---------------------------" << endl;
             for (string filePath : filePaths) {
                 cout << "File: " << filePath << endl << endl;
                 ifstream file(filePath);
@@ -250,13 +275,31 @@ class SudokuInputReader
                     bool successfulFileProcessing = processFileIntoBoard(board, filePath);
                     if (successfulFileProcessing)
                     {
-                        board.solve();
+                        vector<string> solutionList = board.getStringSolutionList();
+
+                        cout << "Original Board:" << endl << endl;
+
+                        cout << board.toString() << endl;
+
+                        if (solutionList.empty())
+                        {
+                            cout << endl << "Solutions: None" << endl;
+                        }
+                        else
+                        {
+                            for(int i = 0; i < solutionList.size(); i++)
+                            {
+                                cout << endl << "Solution " << (i + 1) << ":" << endl;
+                                cout << solutionList[i] << endl;
+                            }
+                        }
                     }
                 }
                 else
                 {
                     cerr << "Error: Filepath \"" << filePath << "\" could not be opened" << endl;
                 }
+                cout << "---------------------------" << endl;
             }
         }
 };

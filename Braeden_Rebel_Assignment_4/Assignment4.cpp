@@ -293,7 +293,7 @@ class SudokuInputReader
                 // If the character is an _ (Braeden)
                 if (character == '_')
                 {
-                    // Add that there was a valid character (Space) before incrementing
+                    // Add that there was a valid character (Space) before incrementing (Braeden)
                     validCharacterCount++;
                     continue;
                 }

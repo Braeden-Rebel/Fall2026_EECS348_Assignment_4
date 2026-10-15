@@ -159,7 +159,7 @@ private:
             // Loop through all allowed digits for the blank cell (Braeden)
             for (int digit = 1; digit <= 9; ++digit) {
                 // Try to assign the current digit to the blank cell (Braeden)
-                bool couldAssign = TryAssignPositionToValue(blankRowIndex, blankColumnIndex, digit);
+                bool couldAssign = tryAssignPositionToValue(blankRowIndex, blankColumnIndex, digit);
                 // Check if the assignment worked (Braeden)
                 if (couldAssign)
                 {
@@ -192,7 +192,7 @@ public:
     Function that takes in the indices of a positon and a digit and tries to assign that position to the digit given
     Returns true if the assignment works and false otherwise (Braeden)
     */
-    bool TryAssignPositionToValue(int rowIndex, int columnIndex, int digit)
+    bool tryAssignPositionToValue(int rowIndex, int columnIndex, int digit)
     {
         // If the position indices exist ont the board, the digit is allowed, and the digit at that position follows sudoku rules: (Braeden)
         if (doesPositionExist(rowIndex, columnIndex) && isDigitAllowed(digit) && isDigitValidAtPosition(rowIndex, columnIndex, digit))
@@ -210,7 +210,7 @@ public:
     }
 
     // Clear the cell at a certain position indicated by the indices (Braeden)
-    void ClearPosition(int rowIndex, int columnIndex)
+    void clearPosition(int rowIndex, int columnIndex)
     {
         // Check if the position indices exist in the board (Braeden)
         if (doesPositionExist(rowIndex, columnIndex))
@@ -221,7 +221,7 @@ public:
     }
 
     // Clear the entire board (Braeden)
-    void Clear()
+    void clear()
     {
         // For every row in the board (Braeden)
         for(int row = 0; row < 9; row++)
@@ -230,7 +230,7 @@ public:
             for(int column = 0; column < 9; column++)
             {
                 // Clear at that position (Braeden)
-                ClearPosition(row, column);
+                clearPosition(row, column);
             }
         }
     }
@@ -315,7 +315,7 @@ class SudokuInputReader
                         int digit = character - '0';
                         // Try to assign the position indicated by the columnIndex and rowIndex to the digit (Braeden)
                         // Digit has to be allowed, and position indices are correct, so if assignment fails then board is invalid (Braeden)
-                        if (!board.TryAssignPositionToValue(rowIndex, columnIndex, digit))
+                        if (!board.tryAssignPositionToValue(rowIndex, columnIndex, digit))
                         {
                             // Board is invalid so add  to error stream that the board in the file is invalid (Braeden)
                             cerr << "Board in file is invalid" << endl;
@@ -354,7 +354,7 @@ class SudokuInputReader
             else
             {
                 // Clear whatever is currently in the board (Braeden)
-                board.Clear();
+                board.clear();
 
                 // Start row index at zero (Braeden)
                 int rowIndex = 0;

@@ -406,7 +406,7 @@ class SudokuInputReader
                     vector<string> solutionList = board.getStringSolutionList();
 
                     // Add original board label to output stream (Braeden)
-                    cout << "Original Board:" << endl << endl;
+                    cout << "Original Board:" << endl;
 
                     // Add original board to output stream (Braeden)
                     cout << board.toString() << endl;

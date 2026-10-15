@@ -284,15 +284,15 @@ class SudokuInputReader
         // Processes a single line and puts it into the given board according to the given row index (Braeden)
         bool processLineIntoBoard(SudokuBoard &board, string line, int rowIndex)
         {
-            // If the line's length is not 17, then it does not match the format shown in the example puzzles (Braeden)
-            if (line.length() != 17)
+            // If the line's length is not 17 or 18, then it does not match the format shown in the example puzzles (Braeden)
+            if (line.length() != 17 && line.length() != 18)
             {
                 // Add an error message about the bad row format to error stream (Braeden)
                 cerr << "Incorrect row length at line " << rowIndex << endl;
                 // Return that the line did not process without error (Braeden)
                 return false;
             }
-            // If the line's length is 17 then it does follow the format (Braeden)
+            // If the line's length is 17 or 18 then it does follow the format (Braeden)
             else
             {
                 // For all indices in the line [incrementing by two to ignore spcaes] (Braeden)

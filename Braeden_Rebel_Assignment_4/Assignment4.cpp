@@ -121,9 +121,9 @@ private:
             // For every column after the starting column index (Braeden)
             for (int columnIndex = startColumnIndex; columnIndex < 9; columnIndex++)
             {
-                // Get the digit at the particular position
+                // Get the digit at the particular position (Braeden)
                 int digit = board[rowIndex][columnIndex];
-                // Check if the digit is valid, since blank cells have invalid digits
+                // Check if the digit is valid, since blank cells have invalid digits (Braeden)
                 if (!isDigitAllowed(digit))
                 {
                     // Assign the two blank indices to the current indices as the current indices are at a blank cell (Braeden)
@@ -160,7 +160,7 @@ private:
             for (int digit = 1; digit <= 9; ++digit) {
                 // Try to assign the current digit to the blank cell (Braeden)
                 bool couldAssign = TryAssignPositionToValue(blankRowIndex, blankColumnIndex, digit);
-                // Check if the assignment worked
+                // Check if the assignment worked (Braeden)
                 if (couldAssign)
                 {
                     // If the assignment did work then create position indices for next position and assign them to the blank position (Braeden)

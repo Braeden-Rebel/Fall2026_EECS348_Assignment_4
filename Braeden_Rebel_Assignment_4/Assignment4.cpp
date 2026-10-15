@@ -284,57 +284,62 @@ class SudokuInputReader
         // Processes a single line and puts it into the given board according to the given row index (Braeden)
         bool processLineIntoBoard(SudokuBoard &board, string line, int rowIndex)
         {
-            // If the line's length is not 17 or 18, then it does not match the format shown in the example puzzles (Braeden)
-            if (line.length() != 17 && line.length() != 18)
+            // Create variable to track how many valid characters found (Braeden)
+            int validCharacterCount = 0;
+            // For every character in the line (Braeden)
+            for(int i = 0; i < line.length(); i++)
             {
-                // Add an error message about the bad row format to error stream (Braeden)
-                cerr << "Incorrect row length at line " << rowIndex << endl;
-                // Return that the line did not process without error (Braeden)
-                return false;
-            }
-            // If the line's length is 17 or 18 then it does follow the format (Braeden)
-            else
-            {
-                // For all indices in the line [incrementing by two to ignore spcaes] (Braeden)
-                for(int i = 0; i < 17; i+=2)
+                char character = line[i];
+                // If the character is an _ (Braeden)
+                if (character == '_')
                 {
-                    // Get specific character at the index (Braeden)
-                    char character = line[i];
-                    
-                    // If the charcater is an _ (Braeden)
-                    if (character == '_')
+                    // Add that there was a valid character (Space) before incrementing
+                    validCharacterCount++;
+                    continue;
+                }
+                // Else check if the character is a valid digit (Braeden)
+                else if (character <= '9' && character >= '0')
+                {
+                    // Get the digit by subtracting the character by zero (Braeden)
+                    int digit = character - '0';
+                    // Try to assign the position indicated by the columnIndex and rowIndex to the digit (Braeden)
+                    // Digit has to be allowed, and position indices are correct, so if assignment fails then board is invalid (Braeden)
+                    if (!board.tryAssignPositionToValue(rowIndex, validCharacterCount, digit))
                     {
-                        continue;
-                    }
-                    // Else if the character is a valid digit (Braeden)
-                    else if (character <= '9' && character >= '0')
-                    {
-                        // Get the columnIndex by dividning the character index by two (Braeden)
-                        int columnIndex = i / 2;
-                        // Get the digit by subtracting the character by zero (Braeden)
-                        int digit = character - '0';
-                        // Try to assign the position indicated by the columnIndex and rowIndex to the digit (Braeden)
-                        // Digit has to be allowed, and position indices are correct, so if assignment fails then board is invalid (Braeden)
-                        if (!board.tryAssignPositionToValue(rowIndex, columnIndex, digit))
-                        {
-                            // Board is invalid so add  to error stream that the board in the file is invalid (Braeden)
-                            cerr << "Board in file is invalid" << endl;
-                            // Return that the line was not processed successfully (Braeden)
-                            return false;
-                        }
-                    }
-                    // Else, the digit is invalid (Braeden)
-                    else
-                    {
-                        // Add to error stream that there was an unrecognized character at the line (Braeden)
-                        cerr << "Unrecognized character " << character << " at line " << rowIndex << endl;
+                        // Board is invalid so add  to error stream that the board in the file is invalid (Braeden)
+                        cerr << "Board in file is invalid" << endl;
                         // Return that the line was not processed successfully (Braeden)
                         return false;
                     }
+                    else
+                    {
+                        // Increment valid character count as character loaded in (Braeden)
+                        validCharacterCount++;
+                    }
+                }
+                // Else, check that the character is not an escape or space before treating as unrecoginized (Braeden)
+                else if (character != '\n' && character != '\r' && character != ' ')
+                {
+                    // Add to error stream that there was an unrecognized character at the line (Braeden)
+                    cerr << "Unrecognized character " << character << " at line " << rowIndex << endl;
+                    // Return that the line was not processed successfully (Braeden)
+                    return false;
                 }
             }
-            // Since processing is complete then the line was processed successfully, return true to indicate this (Braeden)
-            return true;
+
+            // Check if character count is at proper length (Braeden)
+            if (validCharacterCount != 9)
+            {
+                // Print message informing user of bad character length (Braeden)
+                cerr << "Bad line length at line " << rowIndex << endl;
+                // Return that there were errors (Braeden)
+                return false;
+            }
+            else
+            {
+                // Since processing is complete then the line was processed successfully, return true to indicate this (Braeden)
+                return true;
+            }
         }
 
         // Processes a file at a filepath and puts the sudoku board found within the file into the board provided (Braeden)
